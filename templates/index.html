@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homer Config Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #2b2b2b; color: #f8f8f2; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: #3c3f41; padding: 30px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
+        h2 { margin-top: 0; color: #ffffff; text-align: center; margin-bottom: 25px; border-bottom: 1px solid #555; padding-bottom: 15px; }
+        h3 { color: #4caf50; border-bottom: 1px solid #555; padding-bottom: 5px; margin-top: 30px;}
+        
+        /* Formular Styling */
+        label { font-weight: 600; margin-top: 15px; display: block; color: #a9b7c6; }
+        input[type="text"], select { width: 100%; padding: 12px; margin: 8px 0 20px; box-sizing: border-box; background: #2b2b2b; color: #f8f8f2; border: 1px solid #555; border-radius: 6px; font-size: 14px; }
+        input[type="text"]:focus, select:focus { border-color: #4caf50; outline: none; }
+        
+        .button-group { display: flex; gap: 15px; margin-top: 10px; }
+        .btn { padding: 14px 20px; border: none; cursor: pointer; border-radius: 6px; font-size: 16px; font-weight: bold; transition: background 0.3s ease; text-align: center; }
+        .btn-submit { background: #4caf50; color: white; flex: 1; }
+        .btn-submit:hover { background: #45a049; }
+        .btn-reset { background: #555555; color: white; flex: 1; }
+        .btn-reset:hover { background: #666666; }
+        
+        select optgroup { background: #3c3f41; color: #a9b7c6; font-weight: bold; }
+        select option { background: #2b2b2b; color: #f8f8f2; padding: 8px; }
+        
+        /* Messages */
+        .flash-messages { margin-bottom: 20px; }
+        .alert { font-weight: bold; text-align: center; padding: 12px; border-radius: 6px; margin-bottom: 10px; }
+        .alert.success { color: #4caf50; background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.3); }
+        .alert.error { color: #f44336; background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.3); }
+
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #2b2b2b; border-radius: 6px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #3c3f41; vertical-align: middle; }
+        th { color: #a9b7c6; background: #222; font-weight: 600; }
+        td a { color: #4caf50; text-decoration: none; }
+        td a:hover { text-decoration: underline; }
+        
+        /* Action Buttons Table */
+        .action-cell { display: flex; gap: 5px; }
+        .btn-icon { background: #555; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: 0.3s; }
+        .btn-icon:hover:not(:disabled) { background: #777; }
+        .btn-icon:disabled { opacity: 0.2; cursor: not-allowed; }
+        
+        .btn-delete { background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: 0.3s; }
+        .btn-delete:hover { background: #d32f2f; }
+    </style>
+    <script>
+        function checkCustomIcon() {
+            var select = document.getElementById("icon_select");
+            var customInput = document.getElementById("icon_custom");
+            if (select.value === "custom") {
+                customInput.style.display = "block";
+                customInput.required = true;
+            } else {
+                customInput.style.display = "none";
+                customInput.required = false;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-tools"></i> Homer Config Manager</h2>
+        
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        <form method="POST" action="/">
+            <label>Path to config.yml:</label>
+            <input type="text" name="config_path" value="{{ default_path }}" required>
+
+            <label>Category Name (e.g., System, Administration):</label>
+            <input type="text" name="category_name" required>
+
+            <label>Category Icon:</label>
+            <select name="category_icon_select" id="icon_select" onchange="checkCustomIcon()">
+                <optgroup label="Infrastructur & System">
+                    <option value="fas fa-server">Server / Hosting (fas fa-server)</option>
+                    <option value="fas fa-network-wired">Network / Proxy (fas fa-network-wired)</option>
+                    <option value="fab fa-docker">Docker / Container (fab fa-docker)</option>
+                    <option value="fas fa-microchip">Hardware / System (fas fa-microchip)</option>
+                    <option value="fas fa-hdd">Storage / Disks (fas fa-hdd)</option>
+                </optgroup>
+                <optgroup label="Cloud & Files">
+                    <option value="fas fa-cloud" selected>Cloud / Seafile / Nextcloud (fas fa-cloud)</option>
+                    <option value="fas fa-folder-open">Files (fas fa-folder-open)</option>
+                    <option value="fas fa-database">Database (fas fa-database)</option>
+                </optgroup>
+                <optgroup label="Comunication & Office">
+                    <option value="fas fa-envelope">Mail (fas fa-envelope)</option>
+                    <option value="fas fa-briefcase">Produktivity / Office (fas fa-briefcase)</option>
+                    <option value="fas fa-comments">Chat / Messenger (fas fa-comments)</option>
+                </optgroup>
+                <optgroup label="Security & VPN">
+                    <option value="fas fa-key">VPN / Wireguard (fas fa-key)</option>
+                    <option value="fas fa-shield-alt">Security / Firewall (fas fa-shield-alt)</option>
+                </optgroup>
+                <optgroup label="manually">
+                    <option value="custom">--- custom Icon Path ---</option>
+                </optgroup>
+            </select>
+            <input type="text" name="category_icon_custom" id="icon_custom" placeholder="z.B. fas fa-cat" style="display:none;">
+
+            <label>Service Name:</label>
+            <input type="text" name="service_name" required>
+
+            <label>Logo Path (e.g., assets/tools/logo.png):</label>
+            <input type="text" name="logo">
+
+            <label>Subtitle:</label>
+            <input type="text" name="subtitle">
+
+            <label>Tag (e.g., Admin, System):</label>
+            <input type="text" name="tag">
+
+            <label>Service URL:</label>
+            <input type="text" name="url" required>
+
+            <div class="button-group">
+                <button type="submit" class="btn btn-submit"><i class="fas fa-save"></i> Add Service</button>
+                <button type="reset" class="btn btn-reset"><i class="fas fa-eraser"></i> Clear Form</button>
+            </div>
+        </form>
+
+        <h2 style="margin-top: 50px;"><i class="fas fa-list"></i> Current Services in config.yml </h2>
+        
+        {% if config.services %}
+            {% for category in config.services %}
+                <div class="category-block">
+                    <h3><i class="{{ category.icon }}"></i> {{ category.name }}</h3>
+                    <table>
+                        <tr>
+                            <th width="30%">Name</th>
+                            <th width="45%">URL</th>
+                            <th width="25%">Action</th>
+                        </tr>
+                        {% for item in category['items'] %}
+                        <tr>
+                            <td><strong>{{ item.name }}</strong><br><small style="color: #888;">{{ item.subtitle }}</small></td>
+                            <td><a href="{{ item.url }}" target="_blank">{{ item.url }}</a></td>
+                            <td class="action-cell">
+                                
+                                <form action="/move" method="POST" style="margin:0;">
+                                    <input type="hidden" name="config_path" value="{{ default_path }}">
+                                    <input type="hidden" name="category_name" value="{{ category.name }}">
+                                    <input type="hidden" name="service_name" value="{{ item.name }}">
+                                    <input type="hidden" name="direction" value="up">
+                                    <button type="submit" class="btn-icon" title="Nach oben" {% if loop.first %}disabled{% endif %}>
+                                        <i class="fas fa-arrow-up"></i>
+                                    </button>
+                                </form>
+                                
+                                <form action="/move" method="POST" style="margin:0;">
+                                    <input type="hidden" name="config_path" value="{{ default_path }}">
+                                    <input type="hidden" name="category_name" value="{{ category.name }}">
+                                    <input type="hidden" name="service_name" value="{{ item.name }}">
+                                    <input type="hidden" name="direction" value="down">
+                                    <button type="submit" class="btn-icon" title="Nach unten" {% if loop.last %}disabled{% endif %}>
+                                        <i class="fas fa-arrow-down"></i>
+                                    </button>
+                                </form>
+
+                                <form action="/delete" method="POST" style="margin:0;">
+                                    <input type="hidden" name="config_path" value="{{ default_path }}">
+                                    <input type="hidden" name="category_name" value="{{ category.name }}">
+                                    <input type="hidden" name="service_name" value="{{ item.name }}">
+                                    <button type="submit" class="btn-delete" title="Dienst löschen" onclick="return confirm('Möchtest du \'{{ item.name }}\' wirklich löschen?');">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: #a9b7c6;">Es wurden noch keine Services gefunden oder der Pfad ist falsch.</p>
+        {% endif %}
+        
+    </div>
+</body>
+</html>
