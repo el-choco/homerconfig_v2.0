@@ -1,0 +1,12 @@
+services:
+  homer-config-manager:
+    image: paquele/homerconfig:latest
+    container_name: homer-config-manager
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      # CHANGE THIS: Replace the left path with your actual Homer assets directory!
+      # Do NOT change the right path (/app/assets).
+      - /path/to/your/homer/assets:/app/assets
+      

@@ -1,5 +1,11 @@
 # 🛠️ Homer Config Manager v2.1 (Web UI)
 
+---
+
+## Modifications by el-choco
+
+---
+
 *[🇩🇪 Deutsche Version unten](#-deutsche-version)*
 
 A lightweight, web-based Python tool for comfortably managing your [Homer](https://github.com/bastienwirtz/homer) dashboard configuration. 
@@ -75,6 +81,36 @@ Open `serviceconfig.py` and modify this line at the top:
 ```python
 DEFAULT_PATH = '/path/to/your/homer/assets/config.yml'
 ```
+### 🐳 Installation via Docker (Recommended)
+
+---
+
+
+The easiest and cleanest way to run the Homer Config Manager is using our official Docker image. It ensures the script starts automatically with your server and runs completely isolated.
+
+**1. Create a `docker-compose.yml`**
+Create a `docker-compose.yml` in an empty folder. **Important:** Adjust the left side of the volume mapping to point to your actual Homer assets folder!
+```yaml
+services:
+  homer-config-manager:
+    image: paquele/homerconfig:latest
+    container_name: homer-config-manager
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      # CHANGE THIS: Replace the left path with your actual Homer assets directory!
+      # Do NOT change the right path (/app/assets).
+      - /path/to/your/homer/assets:/app/assets
+```
+
+**2. Start the Container**
+Run the following command in your terminal to pull the image and start the container:
+```bash
+docker compose up -d
+```
+The Config Manager is now available at `http://<YOUR-SERVER-IP>:5000`.
+
 
 ---
 
@@ -144,6 +180,35 @@ Du kannst den Standardpfad zu deiner `config.yml` direkt im Skript anpassen, dam
 ```python
 DEFAULT_PATH = '/pfad/zu/deinem/homer/assets/config.yml'
 ```
+
+### 🐳 Installation via Docker (Empfohlen)
+
+Der einfachste und sauberste Weg, den Homer Config Manager auszuführen, ist über unser offizielles Docker-Image. So startet das Tool bei jedem Server-Neustart automatisch und läuft komplett isoliert.
+
+**1. `docker-compose.yml` erstellen**
+Erstelle eine `docker-compose.yml` in einem leeren Ordner. **Wichtig:** Passe die linke Seite des Volume-Mappings an deinen echten Homer-Assets-Ordner an!
+```yaml
+version: '3.8'
+
+services:
+  homer-config-manager:
+    image: paquele/homerconfig:latest
+    container_name: homer-config-manager
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      # HIER ANPASSEN: Ersetze den linken Pfad mit deinem echten Homer-Assets-Ordner!
+      # Der rechte Pfad (/app/assets) darf NICHT verändert werden.
+      - /pfad/zu/deinem/homer/assets:/app/assets
+```
+
+**2. Container starten**
+Führe diesen Befehl in deinem Terminal aus, um das Image herunterzuladen und zu starten:
+```bash
+docker compose up -d
+```
+Der Config Manager ist nun unter `http://<DEINE-SERVER-IP>:5000` erreichbar.
 
 ---
 
